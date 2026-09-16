@@ -139,6 +139,35 @@ table.gx thead th.fx:first-child{z-index:4;background:var(--nata)}
 .sueltas b{font-size:11.5px;color:var(--humo);white-space:nowrap;margin-right:4px}
 .sueltas img{width:54px;height:54px;object-fit:cover;border-radius:8px;cursor:pointer;border:2px solid transparent;flex:0 0 auto}
 .sueltas img.sel{border-color:var(--oro-hondo);box-shadow:0 0 0 2px rgba(176,138,94,.25)}
+.avisoAg{background:var(--papel);border:1px solid var(--nata);border-left:3px solid var(--oro);
+  border-radius:10px;padding:10px 14px;margin:0 0 14px;font-size:13px;color:var(--humo);
+  display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.avisoAg b{color:var(--tinta)}
+.avisoAg button{margin-left:auto}
+.vgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(430px,1fr));gap:12px}
+@media(max-width:940px){.vgrid{grid-template-columns:1fr}}
+.vcard{display:flex;gap:12px;background:var(--papel);border:1px solid var(--nata);
+  border-radius:14px;overflow:hidden;align-items:stretch}
+.vcard .vph{width:96px;flex:0 0 96px;background:var(--nata) center/cover no-repeat;position:relative;
+  display:grid;place-items:center;filter:saturate(.85)}
+.vcard .vph .none{color:var(--humo);font-size:10.5px;text-align:center;padding:4px}
+.vcard .vb{flex:1;min-width:0;padding:11px 13px 11px 0;display:flex;flex-direction:column;gap:7px}
+.vcard .vt{display:flex;gap:7px;align-items:baseline;flex-wrap:wrap}
+.vcard .vt .nm{font-family:var(--serif);font-size:16px;font-weight:600}
+.et{font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
+  padding:2px 7px;border-radius:99px;white-space:nowrap}
+.et.v{background:rgba(107,120,64,.14);color:var(--oliva)}
+.et.b{background:rgba(141,61,78,.12);color:var(--vino)}
+.et.m{background:rgba(176,138,94,.16);color:var(--oro-hondo)}
+.et.n{background:var(--nata);color:var(--humo)}
+.vnums{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.vnums div{min-width:0}
+.vnums b{display:block;font-size:10px;color:var(--humo);font-weight:500;text-transform:uppercase;
+  letter-spacing:.03em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.vnums span{display:block;font-size:15px;font-variant-numeric:tabular-nums;font-weight:600}
+.vsub{font-size:11.5px;color:var(--humo)}
+.vacts{display:flex;gap:6px;flex-wrap:wrap;margin-top:auto;padding-top:2px}
+@media(max-width:560px){.vnums{grid-template-columns:repeat(2,1fr)}.vcard .vph{width:76px;flex:0 0 76px}}
 .acts{display:flex;gap:6px;margin-top:auto}
 .acts .btn{flex:1;text-align:center;padding:7px 4px;font-size:12.5px}
 
@@ -228,6 +257,7 @@ footer{color:var(--humo);font-size:12px;padding:26px 0 34px;border-top:1px solid
     <div class="tabs" role="tablist">
       <button class="tab" role="tab" aria-selected="true" data-tab="inv">Inventario</button>
       <button class="tab" role="tab" aria-selected="false" data-tab="pl">Estado de resultados</button>
+      <button class="tab" role="tab" aria-selected="false" data-tab="vend">Inventario vendido</button>
       <button class="tab" role="tab" aria-selected="false" data-tab="carga">Cargar inventario</button>
     </div>
   </div>
@@ -238,13 +268,13 @@ footer{color:var(--humo);font-size:12px;padding:26px 0 34px;border-top:1px solid
 <section id="inv">
   <div class="kpis" id="kInv"></div>
   <div id="alerta"></div>
+  <div id="avisoAg"></div>
   <div class="tools">
     <input type="text" id="busca" placeholder="Buscar por nombre, SKU, color o talla">
     <select id="fCat"><option value="">Todas las categorías</option></select>
     <select id="fEst">
       <option value="">Todo el inventario</option>
       <option value="low">Por reponer</option>
-      <option value="zero">Agotado</option>
       <option value="slow">Sin venta 60+ días</option>
       <option value="np">Sin precio asignado</option>
       <option value="mg">Margen bajo al tipo de cambio de hoy</option>
@@ -310,6 +340,20 @@ footer{color:var(--humo);font-size:12px;padding:26px 0 34px;border-top:1px solid
         <option value="devolucion">Devoluciones</option></select></h3>
     <div class="scroll"><table id="tMovs"></table></div>
   </div>
+</section>
+
+<section id="vend" hidden>
+  <div class="kpis" id="kVend"></div>
+  <div class="tools">
+    <input type="text" id="buscaV" placeholder="Buscar por nombre, SKU, color o talla">
+    <select id="fVend">
+      <option value="">Todo lo agotado</option>
+      <option value="v">Se agotó vendiendo</option>
+      <option value="b">Se fue por baja</option>
+    </select>
+  </div>
+  <div class="vgrid" id="gridV"></div>
+  <div class="vacio" id="vacioV" hidden>Todavía no se agota ninguna prenda. Cuando una llegue a cero, aparecerá aquí con lo que dejó.</div>
 </section>
 
 <section id="carga" hidden>
@@ -465,7 +509,9 @@ for(var t=0;t<tabs.length;t++)tabs[t].addEventListener("click",function(){
   document.getElementById("inv").hidden=this.dataset.tab!=="inv";
   document.getElementById("pl").hidden=this.dataset.tab!=="pl";
   document.getElementById("carga").hidden=this.dataset.tab!=="carga";
+  document.getElementById("vend").hidden=this.dataset.tab!=="vend";
   if(this.dataset.tab==="pl")pintarPL();
+  if(this.dataset.tab==="vend")pintarVend();
   if(this.dataset.tab==="carga")cgInit();
   window.scrollTo(0,0);
 });
@@ -664,7 +710,7 @@ function nuevaPrenda(){
         motivo:"Inventario inicial",canal:""});
     }
     recalcItem(it.id);
-    guardar();cerrar();pintarInv();aviso("Prenda agregada.");
+    guardar();cerrar();pintarTodo();aviso("Prenda agregada.");
   });
 }
 function editarPrenda(id){
@@ -694,7 +740,7 @@ function editarPrenda(id){
     it.nombre=val("nm")||it.nombre; it.sku=val("sku"); it.cat=val("cat")||"Sin categoría";
     it.talla=val("talla"); it.color=val("color"); it.precio=num("pr"); it.min=num("min");
     it.foto=document.getElementById("prev").dataset.d||it.foto;
-    guardar();cerrar();pintarInv();aviso("Cambios guardados.");
+    guardar();cerrar();pintarTodo();aviso("Cambios guardados.");
   });
 }
 
@@ -826,7 +872,8 @@ function entrada(id){
         motivo:tipo,canal:""});
     }
     recalcItem(it.id);
-    guardar();cerrar();pintarInv();aviso("Entrada registrada. Costo promedio: "+mxn(it.costoMXN,2)+".");
+    guardar();cerrar();pintarTodo();
+    aviso("Entrada registrada. "+it.sku+" queda con "+it.qty+" pz · costo promedio "+mxn(it.costoMXN,2)+".");
   });
 }
 
@@ -866,7 +913,9 @@ function vender(id){
       qty:q,costoUSDU:0,costoMXNU:0,tc:0,extras:0,
       precioU:p,desc:d,cogs:0,cogsUSD:0,motivo:"",canal:val("cn")});
     recalcItem(it.id);
-    guardar();cerrar();pintarInv();aviso("Venta registrada.");
+    guardar();cerrar();pintarTodo();
+    aviso(it.qty<=0?"Venta registrada. "+it.sku+" quedó agotado y pasó a Inventario vendido."
+                   :"Venta registrada. Quedan "+it.qty+" pz de "+it.sku+".");
   });
 }
 
@@ -899,7 +948,9 @@ function baja(id){
       qty:q,costoUSDU:0,costoMXNU:0,tc:0,extras:0,precioU:0,desc:0,
       cogs:0,cogsUSD:0,motivo:val("m"),canal:""});
     recalcItem(it.id);
-    guardar();cerrar();pintarInv();aviso("Baja registrada.");
+    guardar();cerrar();pintarTodo();
+    aviso(it.qty<=0?"Baja registrada. "+it.sku+" quedó en cero y pasó a Inventario vendido."
+                   :"Baja registrada. Quedan "+it.qty+" pz de "+it.sku+".");
   });
 }
 
@@ -936,11 +987,13 @@ function pintarInv(){
   var uds=0,vc=0,vu=0,vv=0,alert=0;
   db.items.forEach(function(i){
     uds+=i.qty; vc+=i.qty*i.costoMXN; vu+=i.qty*i.costoUSD; vv+=i.qty*i.precio;
-    if(i.qty<=(i.min||0))alert++;
+    if(i.qty>0&&i.qty<=(i.min||0))alert++;
   });
   var repo=vu*db.cfg.tc, expo=repo-vc, mg=vv>0?(vv-vc)/vv*100:0, mgr=vv>0?(vv-repo)/vv*100:0;
+  var vivos=db.items.filter(function(i){return i.qty>0;});
+  var idos=db.items.filter(function(i){return i.qty<=0;});
   document.getElementById("kInv").innerHTML=
-    tarjeta("a","Inventario a costo",mxn(vc),usd(vu,0)+" · "+uds+" piezas · "+db.items.length+" SKU")+
+    tarjeta("a","Inventario a costo",mxn(vc),usd(vu,0)+" · "+uds+" piezas · "+vivos.length+" SKU con existencia")+
     tarjeta("c","Reponerlo hoy costaría",mxn(repo),(expo>=0?"+":"")+mxn(expo)+" contra tu costo histórico")+
     tarjeta("m","Venta potencial",mxn(vv),"margen "+pct(mg)+" · al reponer "+pct(mgr))+
     tarjeta(alert?"v":"","Por reponer",String(alert),alert?"SKU en o bajo el mínimo":"todo con existencia sana");
@@ -953,12 +1006,11 @@ function pintarInv(){
 
   var q=document.getElementById("busca").value.toLowerCase();
   var cat=fc.value,est=document.getElementById("fEst").value;
-  var lista=db.items.filter(function(i){
+  var lista=vivos.filter(function(i){
     var txt=(i.nombre+" "+i.sku+" "+i.color+" "+i.talla+" "+i.cat).toLowerCase();
     if(q&&txt.indexOf(q)<0)return false;
     if(cat&&i.cat!==cat)return false;
     if(est==="low"&&!(i.qty<=(i.min||0)&&i.qty>0))return false;
-    if(est==="zero"&&i.qty!==0)return false;
     if(est==="slow"){var d=dias(i.ultVenta||i.alta);if(!(i.qty>0&&d!==null&&d>=60))return false;}
     if(est==="np"&&i.precio>0)return false;
     if(est==="mg"){var r=i.precio>0?(i.precio-i.costoUSD*db.cfg.tc)/i.precio*100:0;if(r>=db.cfg.margenObj)return false;}
@@ -969,9 +1021,20 @@ function pintarInv(){
     '<div class="alerta">Hay <b>'+negs.length+' prenda'+(negs.length>1?"s":"")+'</b> cuyo inventario quedó en negativo: '+
     negs.map(function(i){return esc(i.nombre)+" (desde "+fecha(i.neg)+")";}).join(", ")+
     '. Suele significar una venta fechada antes de su compra, o una compra que falta capturar. Ábrela y usa Historial para corregirla.</div>':"";
+  /* las agotadas no se esconden en silencio: aquí queda la liga a su pestaña */
+  var ven=idos.filter(function(i){return salidas(i).tipo==="v";}).length;
+  document.getElementById("avisoAg").innerHTML=idos.length?
+    '<div class="avisoAg"><span><b>'+idos.length+'</b> prenda'+(idos.length>1?"s":"")+
+    ' fuera del inventario'+(ven?', <b>'+ven+'</b> por haberse vendido':"")+
+    '. Las vendidas son las candidatas naturales a reponer.</span>'+
+    '<button class="btn sm" id="irVend">Ver inventario vendido</button></div>':"";
+  var bv=document.getElementById("irVend");
+  if(bv)bv.onclick=function(){document.querySelector('.tab[data-tab="vend"]').click();};
+
   document.getElementById("vacioInv").hidden=db.items.length>0;
   document.getElementById("grid").innerHTML=lista.map(tarjetaPrenda).join("")||
-    (db.items.length?'<div class="vacio">Ningún artículo coincide con ese filtro.</div>':"");
+    (db.items.length?'<div class="vacio">'+(vivos.length?"Ningún artículo coincide con ese filtro.":
+      "Todo el inventario está agotado. Revisa la pestaña Inventario vendido.")+'</div>':"");
 }
 function tarjeta(cls,t,v,s){
   return '<div class="kpi '+cls+'"><b>'+t+'</b><div class="v">'+v+'</div><div class="s">'+s+'</div></div>';
@@ -1011,6 +1074,106 @@ document.getElementById("grid").addEventListener("click",function(e){
   var id=b.dataset.id, a=b.dataset.a;
   if(a==="v")vender(id); else if(a==="e")entrada(id); else if(a==="b")baja(id); else editarPrenda(id);
 });
+document.getElementById("gridV").addEventListener("click",function(e){
+  var b=e.target.closest("button[data-a]"); if(!b)return;
+  var id=b.dataset.id, a=b.dataset.a;
+  if(a==="e")entrada(id); else if(a==="h")historial(id); else editarPrenda(id);
+});
+["buscaV","fVend"].forEach(function(k){
+  document.getElementById(k).addEventListener("input",pintarVend);
+  document.getElementById(k).addEventListener("change",pintarVend);
+});
+
+/* ======================= Inventario vendido ======================= */
+function difDias(a,b){
+  if(!a||!b)return null;
+  var d=(new Date(b+"T00:00:00")-new Date(a+"T00:00:00"))/86400000;
+  return isFinite(d)?Math.max(0,Math.round(d)):null;
+}
+/* Resume por qué una prenda llegó a cero. Vender y dar de baja no son lo mismo. */
+function salidas(it){
+  var r={v:0,ing:0,cog:0,b:0,cb:0,ultV:null,ultS:null,prim:null};
+  db.movs.forEach(function(m){
+    if(m.itemId!==it.id)return;
+    if(m.tipo==="entrada"){ if(!r.prim||m.f<r.prim)r.prim=m.f; return; }
+    if(m.tipo==="devolucion")return;
+    if(!r.ultS||m.f>r.ultS)r.ultS=m.f;
+    if(m.tipo==="venta"){
+      r.v+=m.qty; r.ing+=m.qty*m.precioU-(m.desc||0); r.cog+=m.cogs||0;
+      if(!r.ultV||m.f>r.ultV)r.ultV=m.f;
+    }else{ r.b+=m.qty; r.cb+=m.cogs||0; }
+  });
+  if(!r.prim)r.prim=it.alta;
+  r.tipo = r.v>0&&r.b>0 ? "mix" : (r.v>0?"v":(r.b>0?"b":"n"));
+  r.util = r.ing-r.cog;
+  r.mg = r.ing>0 ? r.util/r.ing*100 : 0;
+  r.duro = difDias(r.prim,r.ultS);
+  return r;
+}
+var ET={v:["v","Vendido"],b:["b","Baja"],mix:["m","Vendido y baja"],n:["n","Sin movimiento"]};
+function tarjetaVendida(i){
+  var s=salidas(i), fi=fotoDe(i), e=ET[s.tipo];
+  var ritmo=(s.duro!==null&&s.duro>0&&s.v>0)?(s.v/s.duro*30):null;
+  return '<article class="vcard">'+
+    '<div class="vph" style="'+(fi?"background-image:url('"+fi+"')":"")+'">'+
+      (fi?"":'<div class="none">Sin foto</div>')+'</div>'+
+    '<div class="vb">'+
+      '<div class="vt"><span class="et '+e[0]+'">'+e[1]+'</span>'+
+        '<span class="nm">'+esc(i.nombre)+'</span></div>'+
+      '<div class="meta">'+esc(i.sku)+' · '+esc([i.cat,i.talla,i.color].filter(Boolean).join(" · "))+'</div>'+
+      '<div class="vnums">'+
+        '<div><b>Vendidas</b><span>'+s.v+(s.b?' <em style="font-size:11px;color:var(--vino)">+'+s.b+' baja</em>':"")+'</span></div>'+
+        '<div><b>Ingreso</b><span>'+mxn(s.ing)+'</span></div>'+
+        '<div><b>Utilidad</b><span class="'+(s.util>=0?"pos":"bad")+'">'+mxn(s.util)+'</span></div>'+
+        '<div><b>Margen</b><span class="'+claseMg(s.mg)+'">'+pct(s.mg)+'</span></div>'+
+      '</div>'+
+      '<div class="vsub">'+
+        (s.ultS?"Quedó en cero el "+fecha(s.ultS):"Sin existencia")+
+        (s.duro!==null?" · duró "+s.duro+" día"+(s.duro===1?"":"s")+" en piso":"")+
+        (ritmo?" · ritmo "+ritmo.toFixed(1)+" pz al mes":"")+
+        (s.cb>0?" · "+mxn(s.cb)+" perdidos en bajas":"")+
+        '</div>'+
+      '<div class="vacts">'+
+        '<button class="btn pri" data-a="e" data-id="'+i.id+'">Reponer</button>'+
+        '<button class="btn" data-a="h" data-id="'+i.id+'">Historial</button>'+
+        '<button class="btn" data-a="x" data-id="'+i.id+'">Editar</button>'+
+      '</div>'+
+    '</div></article>';
+}
+function pintarVend(){
+  var idos=db.items.filter(function(i){return i.qty<=0;});
+  var pz=0,ing=0,util=0,perd=0,vend=0,dur=[];
+  idos.forEach(function(i){
+    var s=salidas(i);
+    pz+=s.v; ing+=s.ing; util+=s.util; perd+=s.cb;
+    if(s.tipo==="v"||s.tipo==="mix"){vend++; if(s.duro!==null&&s.duro>0)dur.push([s.duro,i,s]);}
+  });
+  dur.sort(function(a,b){return a[0]-b[0];});
+  var mg=ing>0?util/ing*100:0;
+  document.getElementById("kVend").innerHTML=
+    tarjeta("a","Prendas agotadas",String(idos.length),vend+" por venta · "+(idos.length-vend)+" por otra razón")+
+    tarjeta("m","Lo que dejaron",mxn(ing),pz+" piezas vendidas")+
+    tarjeta(util>=0?"c":"v","Utilidad bruta",mxn(util),"margen "+pct(mg)+(perd>0?" · "+mxn(perd)+" en bajas":""))+
+    tarjeta("","La más rápida",dur.length?dur[0][0]+" días":"—",
+      dur.length?esc(dur[0][1].sku)+" · repónla primero":"aún sin datos de rotación");
+
+  var q=document.getElementById("buscaV").value.toLowerCase();
+  var f=document.getElementById("fVend").value;
+  var lista=idos.filter(function(i){
+    var t=(i.nombre+" "+i.sku+" "+i.color+" "+i.talla+" "+i.cat).toLowerCase();
+    if(q&&t.indexOf(q)<0)return false;
+    var tp=salidas(i).tipo;
+    if(f==="v"&&!(tp==="v"||tp==="mix"))return false;
+    if(f==="b"&&!(tp==="b"||tp==="mix"))return false;
+    return true;
+  }).sort(function(a,b){
+    var x=salidas(a).ultS||"", y=salidas(b).ultS||"";
+    return x===y?0:(x<y?1:-1);
+  });
+  document.getElementById("vacioV").hidden=idos.length>0;
+  document.getElementById("gridV").innerHTML=lista.map(tarjetaVendida).join("")||
+    (idos.length?'<div class="vacio">Nada coincide con ese filtro.</div>':"");
+}
 
 /* ======================= Estado de resultados ======================= */
 function rango(){
@@ -1657,7 +1820,9 @@ function cgGuardar(){
 }
 
 /* ======================= Arranque ======================= */
-function pintarTodo(){pintarInv();if(!document.getElementById("pl").hidden)pintarPL();}
+function pintarTodo(){pintarInv();
+  if(!document.getElementById("pl").hidden)pintarPL();
+  if(!document.getElementById("vend").hidden)pintarVend();}
 cgBind();
 document.getElementById("bNew").onclick=nuevaPrenda;
 document.getElementById("bDemo").onclick=cargarCatalogo;
