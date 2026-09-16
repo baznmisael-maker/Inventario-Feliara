@@ -146,6 +146,23 @@ table.gx td.ojo{background:#FBF4E9}
   display:flex;gap:10px;align-items:center;flex-wrap:wrap}
 .avisoAg b{color:var(--tinta)}
 .avisoAg button{margin-left:auto}
+#puerta{position:fixed;inset:0;z-index:200;background:var(--lienzo);display:grid;place-items:center;padding:20px;overflow:auto}
+#puerta .caja{width:100%;max-width:390px;background:var(--papel);border:1px solid var(--nata);
+  border-radius:18px;padding:28px 26px;box-shadow:0 18px 50px rgba(61,48,42,.10)}
+#puerta img.marca{display:block;width:170px;margin:0 auto 18px}
+#puerta h1{font-family:var(--serif);font-size:21px;font-weight:600;margin:0 0 4px;text-align:center}
+#puerta p.sub{font-size:12.5px;color:var(--humo);text-align:center;margin:0 0 20px;line-height:1.5}
+#puerta label{display:block;font-size:11px;color:var(--humo);margin:0 0 4px}
+#puerta input{width:100%;padding:10px 12px;border:1px solid var(--nata);border-radius:10px;
+  background:#fff;font:inherit;font-size:14px;color:var(--tinta);margin-bottom:12px}
+#puerta .btn{width:100%;justify-content:center;padding:11px}
+#puerta .err{font-size:12.5px;color:var(--vino);margin:10px 0 0;min-height:17px;text-align:center;line-height:1.45}
+#puerta .cfgv{font-size:11px;color:var(--humo);text-align:center;margin-top:16px;line-height:1.5}
+.cinta{position:fixed;left:0;right:0;bottom:0;z-index:150;background:var(--vino);color:#fff;
+  font-size:12.5px;padding:8px 14px;text-align:center;display:none}
+.cinta.on{display:block}
+.quien{font-size:11.5px;color:var(--humo);display:flex;align-items:center;gap:8px}
+.quien b{color:var(--tinta);font-weight:600}
 .par{display:flex;gap:6px}
 .par input{flex:1;min-width:0}
 .ccbtns{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
@@ -279,6 +296,7 @@ footer{color:var(--humo);font-size:12px;padding:26px 0 34px;border-top:1px solid
       <div class="sp"></div>
       <div class="mini">
         <button class="fx" id="bFx">Tipo de cambio <b id="fxv">—</b></button>
+        <span class="quien" id="quien" hidden><b id="qMail"></b><button class="btn sm gh" id="bRefrescar" title="Traer lo más reciente">Actualizar</button><button class="btn sm gh" id="bSalir">Salir</button></span>
         <button class="btn sm gh" id="bExp">Respaldar</button>
         <button class="btn sm gh" id="bImp">Restaurar</button>
         <input type="file" id="fImp" accept="application/json" hidden>
@@ -292,6 +310,32 @@ footer{color:var(--humo);font-size:12px;padding:26px 0 34px;border-top:1px solid
     </div>
   </div>
 </header>
+
+<div id="puerta">
+  <div class="caja">
+    <img class="marca" src="data:image/png;base64,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" alt="Felari Boutique">
+    <h1>Entrar al inventario</h1>
+    <p class="sub">Solo las cuentas dadas de alta pueden ver estos datos.</p>
+    <div id="pForm">
+      <label for="pMail">Correo</label>
+      <input type="email" id="pMail" autocomplete="username" inputmode="email">
+      <label for="pPass">Contraseña</label>
+      <input type="password" id="pPass" autocomplete="current-password">
+      <button class="btn pri" id="pEntrar">Entrar</button>
+      <p class="err" id="pErr"></p>
+    </div>
+    <div id="pCfg" hidden>
+      <label for="pUrl">URL del proyecto de Supabase</label>
+      <input type="text" id="pUrl" placeholder="https://xxxx.supabase.co">
+      <label for="pKey">Llave pública (anon o publishable)</label>
+      <input type="text" id="pKey" placeholder="eyJhbGciOi… o sb_publishable_…">
+      <button class="btn pri" id="pGuardarCfg">Guardar y continuar</button>
+      <p class="err" id="pErr2"></p>
+    </div>
+    <p class="cfgv" id="pPie"></p>
+  </div>
+</div>
+<div class="cinta" id="cinta"></div>
 
 <main class="wrap">
 
@@ -503,6 +547,192 @@ footer{color:var(--humo);font-size:12px;padding:26px 0 34px;border-top:1px solid
 /* ======================= Datos ======================= */
 var KEY="felari_inv_v3", KEY1="atelier_inv_v1";
 
+/* =================================================================
+   Nube · Supabase
+   La llave pública va aquí a propósito: por sí sola no abre nada.
+   Lo que protege los datos son las políticas RLS del esquema, que
+   exigen sesión iniciada. Por eso el registro público debe quedar
+   APAGADO en Supabase.
+   ================================================================= */
+var SB_URL = "";      /* <-- pega aquí la URL de tu proyecto  */
+var SB_KEY = "";      /* <-- pega aquí la llave pública       */
+
+var SES=null, remoto=null, sincronizando=false, sucio=false, falla=0, encuesta=null;
+var CLAVE_SES="felari_ses", CLAVE_CFG="felari_sb", CACHE="felari_cache_v1";
+
+function sbCfg(){
+  if(SB_URL&&SB_KEY)return true;
+  try{var c=JSON.parse(localStorage.getItem(CLAVE_CFG)||"null");
+    if(c&&c.url&&c.key){SB_URL=c.url;SB_KEY=c.key;return true;}}catch(e){}
+  return false;
+}
+function sbHead(json){
+  var h={apikey:SB_KEY,Authorization:"Bearer "+(SES&&SES.access_token?SES.access_token:SB_KEY)};
+  if(json)h["Content-Type"]="application/json";
+  return h;
+}
+function sbPide(ruta,opt){
+  return fetch(SB_URL.replace(/\/+$/,"")+ruta,opt||{}).then(function(r){
+    return r.text().then(function(t){
+      var d=null; try{d=t?JSON.parse(t):null;}catch(e){}
+      if(!r.ok){
+        var e=new Error((d&&(d.error_description||d.msg||d.message||d.error))||("HTTP "+r.status));
+        e.status=r.status; throw e;
+      }
+      return d;
+    });
+  });
+}
+function sbEntrar(mail,pass){
+  return sbPide("/auth/v1/token?grant_type=password",{method:"POST",
+    headers:{apikey:SB_KEY,"Content-Type":"application/json"},
+    body:JSON.stringify({email:mail,password:pass})
+  }).then(function(d){SES=d;guardaSes();return d;});
+}
+function sbRenovar(){
+  if(!SES||!SES.refresh_token)return Promise.reject(new Error("sin sesión"));
+  return sbPide("/auth/v1/token?grant_type=refresh_token",{method:"POST",
+    headers:{apikey:SB_KEY,"Content-Type":"application/json"},
+    body:JSON.stringify({refresh_token:SES.refresh_token})
+  }).then(function(d){SES=d;guardaSes();return d;});
+}
+function guardaSes(){
+  try{SES.vence=Date.now()+((SES.expires_in||3600)-90)*1000;
+    localStorage.setItem(CLAVE_SES,JSON.stringify(SES));}catch(e){}
+}
+function sbSalir(){
+  try{localStorage.removeItem(CLAVE_SES);localStorage.removeItem(CACHE);}catch(e){}
+  SES=null;location.reload();
+}
+function vigente(){
+  if(!SES)return Promise.reject(new Error("sin sesión"));
+  if(SES.vence&&Date.now()<SES.vence)return Promise.resolve();
+  return sbRenovar();
+}
+function correo(){return (SES&&SES.user&&SES.user.email)||"";}
+
+/* --- traducción entre el tablero y las columnas de la base --- */
+function aFilaItem(i){return {id:i.id,nombre:i.nombre||"",sku:i.sku||"",cat:i.cat||"",talla:i.talla||"",
+  color:i.color||"",precio:+i.precio||0,minimo:+i.min||0,foto:i.foto||"",alta:i.alta||null};}
+function deFilaItem(r){return {id:r.id,nombre:r.nombre||"",sku:r.sku||"",cat:r.cat||"",talla:r.talla||"",
+  color:r.color||"",precio:+r.precio||0,min:+r.minimo||0,foto:r.foto||"",alta:r.alta||null,
+  qty:0,costoUSD:0,costoMXN:0,ultVenta:null};}
+function aFilaMov(m){return {id:m.id,ord:+m.ord||0,f:m.f,item_id:m.itemId,sku:m.sku||"",nombre:m.nombre||"",
+  tipo:m.tipo,qty:+m.qty||0,costo_usd_u:+m.costoUSDU||0,tc:+m.tc||0,extras:+m.extras||0,
+  precio_u:+m.precioU||0,dsc:+m.desc||0,motivo:m.motivo||"",canal:m.canal||""};}
+function deFilaMov(r){return {id:r.id,ord:+r.ord||0,f:r.f,itemId:r.item_id,sku:r.sku||"",nombre:r.nombre||"",
+  tipo:r.tipo,qty:+r.qty||0,costoUSDU:+r.costo_usd_u||0,costoMXNU:0,tc:+r.tc||0,extras:+r.extras||0,
+  precioU:+r.precio_u||0,desc:+r.dsc||0,cogs:0,cogsUSD:0,motivo:r.motivo||"",canal:r.canal||""};}
+function aFilaGasto(g){return {id:g.id,f:g.f,concepto:g.concepto||"",monto:+g.monto||0,
+  moneda:g.moneda||"MXN",tc:+g.tc||0,cat:g.cat||""};}
+function deFilaGasto(r){var tc=+r.tc||0;return {id:r.id,f:r.f,concepto:r.concepto||"",monto:+r.monto||0,
+  moneda:r.moneda||"MXN",tc:tc,cat:r.cat||"",original:tc?(+r.monto||0)/tc:(+r.monto||0)};}
+var TABLAS=[{n:"items",arr:"items",a:aFilaItem,de:deFilaItem},
+            {n:"movs", arr:"movs", a:aFilaMov, de:deFilaMov},
+            {n:"gastos",arr:"gastos",a:aFilaGasto,de:deFilaGasto}];
+function huella(o){var k=Object.keys(o).sort(),s="";
+  for(var i=0;i<k.length;i++)s+=k[i]+"\u0001"+o[k[i]]+"\u0002";return s;}
+function sello(t){return t.map(function(f){
+  var max=""; (f||[]).forEach(function(x){if(x.act>max)max=x.act;});
+  return (f?f.length:0)+":"+max;}).join("|");}
+
+function bajarTodo(){
+  return vigente().then(function(){
+    return Promise.all([
+      sbPide("/rest/v1/items?select=*",{headers:sbHead()}),
+      sbPide("/rest/v1/movs?select=*&order=ord.asc",{headers:sbHead()}),
+      sbPide("/rest/v1/gastos?select=*",{headers:sbHead()}),
+      sbPide("/rest/v1/cfg?select=*",{headers:sbHead()})
+    ]);
+  }).then(function(r){
+    db.items =(r[0]||[]).map(deFilaItem);
+    db.movs  =(r[1]||[]).map(deFilaMov);
+    db.gastos=(r[2]||[]).map(deFilaGasto);
+    var c={}; (r[3]||[]).forEach(function(x){c[x.k]=x.v;});
+    db.cfg={tc:+(c.tc||18.00),margenObj:+(c.margenObj||50),seq:0};
+    remoto={};
+    TABLAS.forEach(function(t){remoto[t.n]={};
+      db[t.arr].forEach(function(o){remoto[t.n][o.id]=huella(t.a(o));});});
+    remoto.cfg={tc:String(db.cfg.tc),margenObj:String(db.cfg.margenObj)};
+    revisar.ultimo=sello([r[1],r[0],r[2]]);
+    recalcTodo(); guardaCache(); sucio=false;
+  });
+}
+/* Escritura por diferencias: intercepta guardar() y manda solo lo que cambió,
+   así ningún formulario del tablero tuvo que modificarse. */
+function sincronizar(){
+  if(!SES||!remoto||sincronizando)return Promise.resolve();
+  var ops=[];
+  TABLAS.forEach(function(t){
+    var vistos={};
+    db[t.arr].forEach(function(o){
+      var fila=t.a(o),hh=huella(fila); vistos[o.id]=1;
+      if(remoto[t.n][o.id]!==hh)ops.push({t:t,tipo:"up",fila:fila,h:hh,id:o.id});
+    });
+    Object.keys(remoto[t.n]).forEach(function(id){if(!vistos[id])ops.push({t:t,tipo:"del",id:id});});
+  });
+  ["tc","margenObj"].forEach(function(k){
+    if(remoto.cfg[k]!==String(db.cfg[k]))ops.push({cfg:k,valor:db.cfg[k]});});
+  if(!ops.length){sucio=false;cinta("");return Promise.resolve();}
+  sincronizando=true;
+  return vigente().then(function(){
+    var tareas=[];
+    TABLAS.forEach(function(t){
+      var ups=ops.filter(function(o){return o.t===t&&o.tipo==="up";});
+      for(var i=0;i<ups.length;i+=200){
+        (function(lote){
+          tareas.push(sbPide("/rest/v1/"+t.n,{method:"POST",
+            headers:Object.assign(sbHead(true),{Prefer:"resolution=merge-duplicates,return=minimal"}),
+            body:JSON.stringify(lote.map(function(o){return o.fila;}))
+          }).then(function(){lote.forEach(function(o){remoto[t.n][o.id]=o.h;});}));
+        })(ups.slice(i,i+200));
+      }
+      var dels=ops.filter(function(o){return o.t===t&&o.tipo==="del";});
+      if(dels.length)tareas.push(sbPide("/rest/v1/"+t.n+"?id=in.("+
+        dels.map(function(o){return '"'+o.id+'"';}).join(",")+")",{method:"DELETE",headers:sbHead()}
+      ).then(function(){dels.forEach(function(o){delete remoto[t.n][o.id];});}));
+    });
+    ops.filter(function(o){return o.cfg;}).forEach(function(o){
+      tareas.push(sbPide("/rest/v1/cfg",{method:"POST",
+        headers:Object.assign(sbHead(true),{Prefer:"resolution=merge-duplicates,return=minimal"}),
+        body:JSON.stringify([{k:o.cfg,v:o.valor}])
+      }).then(function(){remoto.cfg[o.cfg]=String(o.valor);}));
+    });
+    return Promise.all(tareas);
+  }).then(function(){sincronizando=false;sucio=false;falla=0;cinta("");})
+    .catch(function(e){
+      sincronizando=false;sucio=true;falla++;
+      cinta("Sin guardar en la nube ("+(e.message||"error de red")+"). Reintentando…");
+      setTimeout(sincronizar,Math.min(30000,3000*falla));
+    });
+}
+function cinta(t){var c=document.getElementById("cinta");if(!c)return;
+  c.textContent=t||"";c.className=t?"cinta on":"cinta";}
+function guardaCache(){try{localStorage.setItem(CACHE,JSON.stringify(db));}catch(e){}}
+function leeCache(){
+  try{var d=JSON.parse(localStorage.getItem(CACHE)||"null");
+    if(d&&d.items){db=migrar(d);recalcTodo();return true;}}catch(e){}
+  return false;
+}
+/* Trae lo que capturó la otra persona. Sello barato: cuenta + marca de
+   tiempo más reciente de cada tabla, así detecta altas, cambios y borrados. */
+function revisar(){
+  if(!SES||sucio||sincronizando||document.hidden)return Promise.resolve();
+  return vigente().then(function(){
+    return Promise.all(["movs","items","gastos"].map(function(t){
+      return sbPide("/rest/v1/"+t+"?select=id,act",{headers:sbHead()});}));
+  }).then(function(r){
+    var s=sello(r);
+    if(s===revisar.ultimo)return;
+    revisar.ultimo=s;
+    if(document.getElementById("veil").className.indexOf("on")>=0)return;  /* hay un formulario abierto */
+    return bajarTodo().then(function(){
+      pintarTodo(); aviso("Se actualizó con lo que capturó la otra sesión.");
+    });
+  }).catch(function(){});
+}
+
+
 var db={items:[],movs:[],gastos:[],cfg:{tc:18.00,margenObj:50}};
 var memoria=false;
 
@@ -538,9 +768,10 @@ function cargar(){
   }catch(e){memoria=true;}
 }
 function guardar(){
-  if(memoria)return;
-  try{localStorage.setItem(KEY,JSON.stringify(db));}
-  catch(e){memoria=true;aviso("Se llenó el almacenamiento del navegador. Respalda y usa fotos más ligeras.");}
+  guardaCache();
+  sucio=true;
+  clearTimeout(guardar._t);
+  guardar._t=setTimeout(sincronizar,180);   /* agrupa ráfagas de cambios en un solo envío */
 }
 function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,7);}
 function redondear(x,d){var f=Math.pow(10,d);return Math.round((x||0)*f)/f;}
@@ -1208,13 +1439,19 @@ function corrigePedidoInicial(){
   var n=0, antes=0, despues=0;
   db.movs.forEach(function(m){
     if(m.tipo!=="entrada")return;
-    if(!/flete prorrateados/.test(m.motivo||""))return;   /* firma de la carga vieja */
-    if(Math.abs((m.tc||0)-18)>0.001)return;               /* y su tipo de cambio supuesto */
+    /* solo el pedido inicial; lo que capturaste después no se toca,
+       y tampoco lo que hayas ajustado a mano en Corregir costos */
+    if(!/^Pedido inicial/.test(m.motivo||""))return;
+    if(/ajustado a mano/.test(m.motivo||""))return;
     var c=tabla[String(m.sku||"").toUpperCase()]; if(!c)return;
+    var nex=redondear(c[8]*m.qty*c[9],2);
+    if(Math.abs((m.costoUSDU||0)-c[6])<0.0001 &&
+       Math.abs((m.tc||0)-c[9])<0.0001 &&
+       Math.abs((m.extras||0)-nex)<0.01) return;          /* ya está al día */
     antes  += m.qty*(m.costoUSDU||0)*(m.tc||0)+(m.extras||0);
-    m.costoUSDU=c[6]; m.tc=c[9]; m.extras=redondear(c[8]*m.qty*c[9],2);
+    m.costoUSDU=c[6]; m.tc=c[9]; m.extras=nex;
     m.motivo="Pedido inicial · flete US$"+c[8].toFixed(2)+" por pieza";
-    despues+= m.qty*c[6]*c[9]+m.extras;
+    despues+= m.qty*c[6]*c[9]+nex;
     n++;
   });
   if(!n)return 0;
@@ -1225,8 +1462,8 @@ function corrigePedidoInicial(){
   });
   recalcTodo(); guardar();
   setTimeout(function(){
-    aviso("Se corrigieron "+n+" compras del pedido inicial: flete US$8.15 por pieza y tipo de cambio 17.01. "+
-      "Inventario a costo "+mxn(antes)+" → "+mxn(despues)+
+    aviso("Se actualizaron "+n+" compras del pedido inicial con los costos confirmados. "+
+      "Valor de esas compras "+mxn(antes)+" → "+mxn(despues)+
       (np?" · "+np+" precio actualizado":"")+".");
   },900);
   return n;
@@ -1401,10 +1638,19 @@ function ccAplicar(){
   if(!confirm("Se corrigen "+cambios.length+" compra(s)"+(np?" y "+np+" precio(s) de venta":"")+
       ". El tablero recalcula existencias, costo promedio y "+
       "el costo de todo lo que ya vendiste. Esto no se puede deshacer sin un respaldo. ¿Continuar?"))return;
+  var tabla={}; CATALOGO.forEach(function(x){tabla[String(x[0]).toUpperCase()]=x;});
   cambios.forEach(function(r){
     var m=db.movs.filter(function(x){return x.id===r.id;})[0];
     if(!m)return;
     m.costoUSDU=r.n.c; m.tc=r.n.tc; m.extras=r.n.ex; m.f=r.n.f;
+    /* si quedó distinto del catálogo, se marca para que la corrección
+       automática del arranque respete tu ajuste */
+    var c=tabla[String(m.sku||"").toUpperCase()];
+    if(c&&/^Pedido inicial/.test(m.motivo||"")&&!/ajustado a mano/.test(m.motivo||"")){
+      var difiere = Math.abs(m.costoUSDU-c[6])>0.0001 || Math.abs(m.tc-c[9])>0.0001 ||
+                    Math.abs((m.extras||0)-c[8]*m.qty*c[9])>0.01;
+      if(difiere)m.motivo="Pedido inicial · ajustado a mano";
+    }
   });
   Object.keys(CC.precios).forEach(function(id){var it=item(id); if(it)it.precio=CC.precios[id];});
   recalcTodo(); guardar(); ccCargar(); ccPinta(); pintarTodo();
@@ -1806,7 +2052,7 @@ function fotoDe(it){
 /* ======================= Catálogo real ======================= */
 /* Origen: CATALOGO.xlsx (hojas Kids y Women).
    [sku, nombre, categoría, talla, color, piezas, costo de factura USD, precio MXN] */
-var CATALOGO=[["K-1","Modelo K-1","Niños","5-6 años","",1,15,400,8.15,17.01],["K-2","Modelo K-2","Niños","5-6 años","",1,14.5,500,8.15,17.01],["K-3","Modelo K-3","Niños","5-6 años","",1,14,0,8.15,17.01],["K-4","Modelo K-4","Niños","5-6 años","",3,8.6,500,8.15,17.01],["K-5","Modelo K-5","Niños","5-6 años","",3,12.75,500,8.15,17.01],["K-6","Modelo K-6","Niños","5-6 años","",3,12.75,500,8.15,17.01],["K-7","Modelo K-7","Niños","5-6 años","",2,7.8,400,8.15,17.01],["K-8","Modelo K-8","Niños","5-6 años","",2,8.6,0,8.15,17.01],["W-1-M-BLK","Modelo W-1","Mujer","M","Negro",1,26,800,8.15,17.01],["W-1-M-GRY","Modelo W-1","Mujer","M","Gris",3,26,800,8.15,17.01],["W-1-M-WHT","Modelo W-1","Mujer","M","Blanco",1,26,800,8.15,17.01],["W-2-M-GRY","Modelo W-2","Mujer","M","Gris",4,13,0,8.15,17.01],["W-3-L-GRY","Modelo W-3","Mujer","L","Gris",2,12.8,400,8.15,17.01],["W-3-L-BLK","Modelo W-3","Mujer","L","Negro",1,12.8,400,8.15,17.01],["W-3-L-BEI","Modelo W-3","Mujer","L","Beige",2,12.8,400,8.15,17.01],["W-4-M-BEI","Modelo W-4","Mujer","M","Beige",3,19,800,8.15,17.01],["W-5-XL-WHT","Modelo W-5","Mujer","XL","Blanco",2,8.7,400,8.15,17.01],["W-5-XXL-WHT","Modelo W-5","Mujer","XXL","Blanco",2,8.7,400,8.15,17.01],["W-6-M-WHT","Modelo W-6","Mujer","M","Blanco",3,9,400,8.15,17.01],["W-7-M-WHT","Modelo W-7","Mujer","M","Blanco",1,10,0,8.15,17.01],["W-7-L-WHT","Modelo W-7","Mujer","L","Blanco",2,10,0,8.15,17.01],["W-7-M-BEI","Modelo W-7","Mujer","M","Beige",1,10,0,8.15,17.01],["W-7-L-BEI","Modelo W-7","Mujer","L","Beige",2,10,0,8.15,17.01],["W-7-M-BLK","Modelo W-7","Mujer","M","Negro",1,10,0,8.15,17.01],["W-7-L-BLK","Modelo W-7","Mujer","L","Negro",3,10,0,8.15,17.01],["W-8-L-WHT","Modelo W-8","Mujer","L","Blanco",3,8.7,450,8.15,17.01],["W-8-L-BEI","Modelo W-8","Mujer","L","Beige",1,8.7,450,8.15,17.01],["W-8-L-BLU","Modelo W-8","Mujer","L","Azul",1,8.7,450,8.15,17.01],["W-8-L-PNK","Modelo W-8","Mujer","L","Rosa",2,8.7,450,8.15,17.01],["W-9-M-BLU","Modelo W-9","Mujer","M","Azul",1,12.6,500,8.15,17.01],["W-9-L-BLU","Modelo W-9","Mujer","L","Azul",2,12.6,500,8.15,17.01],["W-10-L-BLK","Modelo W-10","Mujer","L","Negro",2,14.1,500,8.15,17.01],["W-11-XXL-BRN","Modelo W-11","Mujer","XXL","Café",1,14.4,600,8.15,17.01],["W-11-XL-BRN","Modelo W-11","Mujer","XL","Café",1,14.4,600,8.15,17.01],["W-11-XXL-CRM","Modelo W-11","Mujer","XXL","Crema",1,14.4,600,8.15,17.01],["W-11-XXL-BEI","Modelo W-11","Mujer","XXL","Beige",1,14.4,600,8.15,17.01],["W-11-XL-BEI","Modelo W-11","Mujer","XL","Beige",1,14.4,600,8.15,17.01],["W-11-XXL-GRN","Modelo W-11","Mujer","XXL","Verde",1,14.4,600,8.15,17.01],["W-11-XL-GRN","Modelo W-11","Mujer","XL","Verde",1,14.4,600,8.15,17.01],["W-11-XL-CRM","Modelo W-11","Mujer","XL","Crema",1,14.4,600,8.15,17.01],["W-12-M-IVR","Modelo W-12","Mujer","M","Marfil",2,19,600,8.15,17.01],["W-12-L-IVR","Modelo W-12","Mujer","L","Marfil",1,19,600,8.15,17.01],["W-13-M-WHT","Modelo W-13","Mujer","M","Blanco",2,8.4,400,8.15,17.01],["W-13-L-WHT","Modelo W-13","Mujer","L","Blanco",2,8.4,400,8.15,17.01],["W-14-M-BLK","Modelo W-14","Mujer","M","Negro",2,10.5,400,8.15,17.01],["W-14-L-BLK","Modelo W-14","Mujer","L","Negro",2,10.5,400,8.15,17.01],["W-15-M-BKW","Modelo W-15","Mujer","M","Blanco y negro",1,8.1,400,8.15,17.01],["W-15-L-BKW","Modelo W-15","Mujer","L","Blanco y negro",1,8.1,400,8.15,17.01]];
+var CATALOGO=[["K-1","Modelo K-1","Niños","5-6 años","",1,15,400,5,17.023],["K-2","Modelo K-2","Niños","5-6 años","",1,14.5,500,5,17.023],["K-3","Modelo K-3","Niños","5-6 años","",1,14,0,5,17.023],["K-4","Modelo K-4","Niños","5-6 años","",3,8.6,500,5,17.023],["K-5","Modelo K-5","Niños","5-6 años","",3,12.75,500,5,17.023],["K-6","Modelo K-6","Niños","5-6 años","",3,12.75,500,5,17.023],["K-7","Modelo K-7","Niños","5-6 años","",2,7.8,400,5,17.023],["K-8","Modelo K-8","Niños","5-6 años","",2,8.6,0,5,17.023],["W-1-M-BLK","Modelo W-1","Mujer","M","Negro",1,26,800,9.3,17.023],["W-1-M-GRY","Modelo W-1","Mujer","M","Gris",3,26,800,9.3,17.023],["W-1-M-WHT","Modelo W-1","Mujer","M","Blanco",1,26,800,9.3,17.023],["W-2-M-GRY","Modelo W-2","Mujer","M","Gris",4,13,0,9.3,17.023],["W-3-L-GRY","Modelo W-3","Mujer","L","Gris",2,12.8,400,9.3,17.023],["W-3-L-BLK","Modelo W-3","Mujer","L","Negro",1,12.8,400,9.3,17.023],["W-3-L-BEI","Modelo W-3","Mujer","L","Beige",2,12.8,400,9.3,17.023],["W-4-M-BEI","Modelo W-4","Mujer","M","Beige",3,19,800,9.3,17.023],["W-5-XL-WHT","Modelo W-5","Mujer","XL","Blanco",2,8.7,400,9.3,17.023],["W-5-XXL-WHT","Modelo W-5","Mujer","XXL","Blanco",2,8.7,400,9.3,17.023],["W-6-M-WHT","Modelo W-6","Mujer","M","Blanco",3,9,400,9.3,17.023],["W-7-M-WHT","Modelo W-7","Mujer","M","Blanco",1,10,0,9.3,17.023],["W-7-L-WHT","Modelo W-7","Mujer","L","Blanco",2,10,0,9.3,17.023],["W-7-M-BEI","Modelo W-7","Mujer","M","Beige",1,10,0,9.3,17.023],["W-7-L-BEI","Modelo W-7","Mujer","L","Beige",2,10,0,9.3,17.023],["W-7-M-BLK","Modelo W-7","Mujer","M","Negro",1,10,0,9.3,17.023],["W-7-L-BLK","Modelo W-7","Mujer","L","Negro",3,10,0,9.3,17.023],["W-8-L-WHT","Modelo W-8","Mujer","L","Blanco",3,8.7,450,9.3,17.023],["W-8-L-BEI","Modelo W-8","Mujer","L","Beige",1,8.7,450,9.3,17.023],["W-8-L-BLU","Modelo W-8","Mujer","L","Azul",1,8.7,450,9.3,17.023],["W-8-L-PNK","Modelo W-8","Mujer","L","Rosa",2,8.7,450,9.3,17.023],["W-9-M-BLU","Modelo W-9","Mujer","M","Azul",1,12.6,500,9.3,17.023],["W-9-L-BLU","Modelo W-9","Mujer","L","Azul",2,12.6,500,9.3,17.023],["W-10-L-BLK","Modelo W-10","Mujer","L","Negro",2,14.1,500,9.3,17.023],["W-11-XXL-BRN","Modelo W-11","Mujer","XXL","Café",1,14.4,600,9.3,17.023],["W-11-XL-BRN","Modelo W-11","Mujer","XL","Café",1,14.4,600,9.3,17.023],["W-11-XXL-CRM","Modelo W-11","Mujer","XXL","Crema",1,14.4,600,9.3,17.023],["W-11-XXL-BEI","Modelo W-11","Mujer","XXL","Beige",1,14.4,600,9.3,17.023],["W-11-XL-BEI","Modelo W-11","Mujer","XL","Beige",1,14.4,600,9.3,17.023],["W-11-XXL-GRN","Modelo W-11","Mujer","XXL","Verde",1,14.4,600,9.3,17.023],["W-11-XL-GRN","Modelo W-11","Mujer","XL","Verde",1,14.4,600,9.3,17.023],["W-11-XL-CRM","Modelo W-11","Mujer","XL","Crema",1,14.4,600,9.3,17.023],["W-12-M-IVR","Modelo W-12","Mujer","M","Marfil",2,19,600,9.3,17.023],["W-12-L-IVR","Modelo W-12","Mujer","L","Marfil",1,19,600,9.3,17.023],["W-13-M-WHT","Modelo W-13","Mujer","M","Blanco",2,8.4,400,9.3,17.023],["W-13-L-WHT","Modelo W-13","Mujer","L","Blanco",2,8.4,400,9.3,17.023],["W-14-M-BLK","Modelo W-14","Mujer","M","Negro",2,10.5,400,9.3,17.023],["W-14-L-BLK","Modelo W-14","Mujer","L","Negro",2,10.5,400,9.3,17.023],["W-15-M-BKW","Modelo W-15","Mujer","M","Blanco y negro",1,8.1,400,9.3,17.023],["W-15-L-BKW","Modelo W-15","Mujer","L","Blanco y negro",1,8.1,400,9.3,17.023]];
 /* Costos confirmados por Misa (CATALOGO 16-sep): el flete viene por pieza,
    no prorrateado a valor, y el tipo de cambio de la compra fue 17.01.
    Cada renglón trae su propio flete y tipo de cambio, columnas 8 y 9. */
@@ -2330,11 +2576,102 @@ document.getElementById("bGasto2").onclick=nuevoGasto;
 document.getElementById("per").addEventListener("change",pintarPL);
 document.getElementById("fMov").addEventListener("change",pintarPL);
 
-cargar();
-corrigePedidoInicial();
-if(memoria)aviso("Este navegador bloquea el almacenamiento: los datos se perderán al cerrar.");
-if(!db.items.length&&!db.movs.length)cargarCatalogo();
-pintarInv();
+/* ---------------- Arranque con sesión ---------------- */
+function verErr(id,t){var e=document.getElementById(id);if(e)e.textContent=t||"";}
+function pie(t){document.getElementById("pPie").innerHTML=t||"";}
+
+/* Primera vez en la nube: si está vacía y este navegador ya tiene el
+   inventario de la versión sin nube, se ofrece subirlo tal cual. */
+function sembrar(){
+  var local=null;
+  try{local=JSON.parse(localStorage.getItem(KEY)||"null");}catch(e){}
+  var n=local&&local.items?local.items.length:0;
+  var mv=local&&local.movs?local.movs.length:0;
+  if(n&&confirm("La base en la nube está vacía.\n\nEste navegador tiene "+n+" prendas y "+mv+
+      " movimientos guardados de antes. ¿Subirlos a la nube?\n\n"+
+      "Aceptar = se suben tus datos reales.\nCancelar = se carga el catálogo inicial en blanco.")){
+    db=migrar(local);
+    corrigePedidoInicial();
+    recalcTodo(); guardar();
+    aviso("Se subieron "+n+" prendas y "+mv+" movimientos. Ya los ve cualquiera que entre.");
+    return;
+  }
+  cargarCatalogo();
+  aviso("Base vacía: se cargó el catálogo inicial. Ya quedó en la nube para todas las sesiones.");
+}
+function abrirTablero(){
+  document.getElementById("puerta").style.display="none";
+  document.getElementById("quien").hidden=false;
+  document.getElementById("qMail").textContent=correo();
+  bajarTodo().then(function(){
+    if(!db.items.length&&!db.movs.length)sembrar();
+    else corrigePedidoInicial();
+    pintarTodo();
+    clearInterval(encuesta); encuesta=setInterval(revisar,15000);
+    document.addEventListener("visibilitychange",function(){if(!document.hidden)revisar();});
+  }).catch(function(e){
+    if(leeCache()){
+      pintarTodo();
+      cinta("Sin conexión con la nube ("+(e.message||"error")+"). Estás viendo la última copia local; no captures hasta reconectar.");
+    }else{
+      document.getElementById("puerta").style.display="grid";
+      verErr("pErr","No pude leer los datos: "+(e.message||"error")+
+        ". Revisa que hayas corrido el esquema SQL en Supabase.");
+    }
+  });
+}
+function iniciarPuerta(){
+  if(!sbCfg()){
+    document.getElementById("pForm").hidden=true;
+    document.getElementById("pCfg").hidden=false;
+    pie("Se piden una sola vez y quedan guardadas en este navegador.");
+    return;
+  }
+  pie('<a href="#" id="pReset" style="color:var(--oro-hondo)">Cambiar el proyecto de Supabase</a>');
+  var rr=document.getElementById("pReset");
+  if(rr)rr.onclick=function(ev){ev.preventDefault();
+    try{localStorage.removeItem(CLAVE_CFG);}catch(e){} location.reload();};
+  var g=null;
+  try{g=JSON.parse(localStorage.getItem(CLAVE_SES)||"null");}catch(e){}
+  if(g&&g.refresh_token){
+    SES=g;
+    vigente().then(abrirTablero).catch(function(){
+      SES=null; try{localStorage.removeItem(CLAVE_SES);}catch(e){}
+      document.getElementById("pMail").focus();
+    });
+  }else document.getElementById("pMail").focus();
+}
+document.getElementById("pGuardarCfg").onclick=function(){
+  var u=val("pUrl").replace(/\/+$/,""), k=val("pKey");
+  if(!/^https:\/\/.+/.test(u)||k.length<20){verErr("pErr2","Revisa la URL y la llave.");return;}
+  try{localStorage.setItem(CLAVE_CFG,JSON.stringify({url:u,key:k}));}catch(e){}
+  location.reload();
+};
+document.getElementById("pEntrar").onclick=function(){
+  var b=this,m=val("pMail"),c=document.getElementById("pPass").value;
+  if(!m||!c){verErr("pErr","Escribe tu correo y contraseña.");return;}
+  b.disabled=true;b.textContent="Entrando…";verErr("pErr","");
+  sbEntrar(m,c).then(abrirTablero).catch(function(e){
+    b.disabled=false;b.textContent="Entrar";
+    verErr("pErr",/Invalid login/i.test(e.message||"")
+      ?"Ese correo o contraseña no coinciden."
+      :(e.message||"No se pudo entrar."));
+  });
+};
+["pMail","pPass"].forEach(function(k){
+  document.getElementById(k).addEventListener("keydown",function(e){
+    if(e.key==="Enter")document.getElementById("pEntrar").click();});
+});
+document.getElementById("bSalir").onclick=function(){
+  if(sucio&&!confirm("Hay cambios sin subir. ¿Salir de todas formas?"))return;
+  sbSalir();
+};
+document.getElementById("bRefrescar").onclick=function(){
+  revisar.ultimo=null;
+  revisar().then(function(){aviso("Al día.");});
+};
+window.addEventListener("beforeunload",function(e){if(sucio){e.preventDefault();e.returnValue="";}});
+iniciarPuerta();
 })();
 </script>
 </body>
