@@ -146,6 +146,16 @@ table.gx td.ojo{background:#FBF4E9}
   display:flex;gap:10px;align-items:center;flex-wrap:wrap}
 .avisoAg b{color:var(--tinta)}
 .avisoAg button{margin-left:auto}
+.par{display:flex;gap:6px}
+.par input{flex:1;min-width:0}
+.ccbtns{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+table.lv td input{border:1px solid transparent;background:none;font:inherit;font-size:12.5px;
+  padding:5px 6px;width:86px;border-radius:6px;text-align:right;color:var(--tinta);font-variant-numeric:tabular-nums}
+table.lv td input:hover{border-color:var(--nata)}
+table.lv td input:focus{background:#fff;border-color:var(--oro);outline:none}
+table.lv td input.fch{width:124px;text-align:left}
+table.lv tr.dif td{background:#FBF4E9}
+table.lv tr.dif td input{font-weight:700}
 .segs{display:inline-flex;background:var(--nata);border-radius:10px;padding:3px;gap:2px;margin-bottom:12px}
 .seg{border:0;background:none;font:inherit;font-size:13px;font-weight:600;color:var(--humo);
   padding:7px 16px;border-radius:8px;cursor:pointer;white-space:nowrap}
@@ -389,6 +399,11 @@ footer{color:var(--humo);font-size:12px;padding:26px 0 34px;border-top:1px solid
 </section>
 
 <section id="carga" hidden>
+  <div class="segs">
+    <button class="seg on" data-c="alta">Alta masiva</button>
+    <button class="seg" data-c="corr">Corregir costos</button>
+  </div>
+  <div id="vAlta">
   <h2 class="cgT">Alta masiva de inventario</h2>
   <p class="cgSub">Pega directo desde Excel con Ctrl+V, o suelta el archivo aquí. Si subes el <b>.xlsx original</b> (el binario, no un CSV), también se extraen las fotos incrustadas y se asignan sola cada una a su renglón.</p>
 
@@ -429,6 +444,45 @@ footer{color:var(--humo);font-size:12px;padding:26px 0 34px;border-top:1px solid
         <button class="btn gh" id="cgClear">Descartar todo</button>
         <button class="btn pri" id="cgGo">Agregar al inventario</button>
       </div>
+    </div>
+  </div>
+  </div>
+
+  <div id="vCorr" hidden>
+    <h2 class="cgT">Corregir costos de compra</h2>
+    <p class="cgSub">Cada renglón es <b>una compra</b>. El costo de una prenda no se edita directo: sale de sus compras y el tablero lo recalcula. Cambia aquí el costo de factura, el tipo de cambio o el flete, mira el efecto abajo, y hasta entonces aplica.</p>
+
+    <div class="card2">
+      <h3>Cambios a todo lo que esté filtrado</h3>
+      <div class="lote">
+        <div><label for="ccTc">Poner este tipo de cambio</label>
+          <div class="par"><input type="number" id="ccTc" step="0.01" placeholder="18.40"><button class="btn sm" id="ccTcGo">Aplicar</button></div></div>
+        <div><label for="ccMul">Multiplicar el costo USD por</label>
+          <div class="par"><input type="number" id="ccMul" step="0.0001" placeholder="0.745"><button class="btn sm" id="ccMulGo">Aplicar</button></div></div>
+        <div><label for="ccFl">Repartir este flete total (MXN)</label>
+          <div class="par"><input type="number" id="ccFl" step="0.01" placeholder="6930"><button class="btn sm" id="ccFlGo">Aplicar</button></div></div>
+        <div><label for="ccFecha">Poner esta fecha de compra</label>
+          <div class="par"><input type="date" id="ccFecha"><button class="btn sm" id="ccFechaGo">Aplicar</button></div></div>
+      </div>
+      <div class="ccbtns">
+        <button class="btn sm" id="ccCat">Traer del catálogo corregido</button>
+        <button class="btn sm gh" id="ccSinFlete">Quitar el flete de todos</button>
+        <button class="btn sm gh" id="ccPegar">Pegar costos desde Excel</button>
+        <button class="btn sm gh" id="ccDeshacer">Descartar mis cambios</button>
+      </div>
+    </div>
+
+    <div class="tools">
+      <input type="text" id="ccBusca" placeholder="Buscar por nombre, SKU, color o talla">
+      <select id="ccFil">
+        <option value="">Todas las compras</option>
+        <option value="d">Solo las que cambié</option>
+      </select>
+    </div>
+    <div class="lwrap"><table class="lv" id="ccTabla"></table></div>
+    <div class="cgFoot">
+      <div id="ccRes" class="hint" style="flex:1;min-width:260px"></div>
+      <div class="cgAct"><button class="btn pri" id="ccAplicar">Aplicar correcciones</button></div>
     </div>
   </div>
 </section>
@@ -1117,18 +1171,246 @@ document.getElementById("gridV").addEventListener("click",function(e){
   var id=b.dataset.id, a=b.dataset.a;
   if(a==="e")entrada(id); else if(a==="h")historial(id); else editarPrenda(id);
 });
-document.querySelectorAll(".seg").forEach(function(s){
+document.querySelectorAll("#vend .seg").forEach(function(s){
   s.onclick=function(){
     VISTA=this.dataset.v;
-    document.querySelectorAll(".seg").forEach(function(x){x.className="seg"+(x===s?" on":"");});
+    document.querySelectorAll("#vend .seg").forEach(function(x){x.className="seg"+(x===s?" on":"");});
     pintarVend();
   };
 });
+document.querySelectorAll("#carga .seg").forEach(function(s){
+  s.onclick=function(){
+    var v=this.dataset.c;
+    document.querySelectorAll("#carga .seg").forEach(function(x){x.className="seg"+(x===s?" on":"");});
+    document.getElementById("vAlta").hidden = v!=="alta";
+    document.getElementById("vCorr").hidden = v!=="corr";
+    if(v==="corr"){ccCargar();ccPinta();}
+  };
+});
+ccBind();
 document.getElementById("bCsvV").onclick=csvVentas;
 ["buscaV","fVend","fPer"].forEach(function(k){
   document.getElementById(k).addEventListener("input",pintarVend);
   document.getElementById(k).addEventListener("change",pintarVend);
 });
+
+
+/* ---- Corrección automática del pedido inicial ----
+   La primera carga del catálogo prorrateaba el flete a valor y usaba un
+   tipo de cambio supuesto de 18.00. Misa confirmó que el flete es US$8.15
+   por pieza y el tipo de cambio de la compra fue 17.01. Esto reescribe
+   SOLO esas entradas, que se reconocen por su motivo y por el 18.00.
+   Cualquier compra capturada después queda intacta. Corre una sola vez:
+   al terminar cambia el motivo y ya no vuelve a empatar. */
+var PRECIOS_CORREGIDOS={"W-10-L-BLK":[400,500],"W-15-M-BKW":[600,400]};
+function corrigePedidoInicial(){
+  var tabla={}; CATALOGO.forEach(function(r){tabla[String(r[0]).toUpperCase()]=r;});
+  var n=0, antes=0, despues=0;
+  db.movs.forEach(function(m){
+    if(m.tipo!=="entrada")return;
+    if(!/flete prorrateados/.test(m.motivo||""))return;   /* firma de la carga vieja */
+    if(Math.abs((m.tc||0)-18)>0.001)return;               /* y su tipo de cambio supuesto */
+    var c=tabla[String(m.sku||"").toUpperCase()]; if(!c)return;
+    antes  += m.qty*(m.costoUSDU||0)*(m.tc||0)+(m.extras||0);
+    m.costoUSDU=c[6]; m.tc=c[9]; m.extras=redondear(c[8]*m.qty*c[9],2);
+    m.motivo="Pedido inicial · flete US$"+c[8].toFixed(2)+" por pieza";
+    despues+= m.qty*c[6]*c[9]+m.extras;
+    n++;
+  });
+  if(!n)return 0;
+  var np=0;
+  db.items.forEach(function(it){                          /* dos precios que Misa cambió */
+    var pc=PRECIOS_CORREGIDOS[String(it.sku||"").toUpperCase()];
+    if(pc&&Math.abs((it.precio||0)-pc[0])<0.5){it.precio=pc[1];np++;}
+  });
+  recalcTodo(); guardar();
+  setTimeout(function(){
+    aviso("Se corrigieron "+n+" compras del pedido inicial: flete US$8.15 por pieza y tipo de cambio 17.01. "+
+      "Inventario a costo "+mxn(antes)+" → "+mxn(despues)+
+      (np?" · "+np+" precio actualizado":"")+".");
+  },900);
+  return n;
+}
+
+/* ======================= Corregir costos ======================= */
+/* Se trabaja sobre una copia. Nada toca el kardex hasta que se aplica. */
+var CC={filas:[],precios:{},listo:false};
+function ccCargar(){
+  CC.precios={};
+  CC.filas=db.movs.filter(function(m){return m.tipo==="entrada";})
+    .sort(function(a,b){return a.f===b.f?(a.ord||0)-(b.ord||0):(a.f<b.f?1:-1);})
+    .map(function(m){
+      return {id:m.id, it:item(m.itemId)||{}, qty:m.qty, sku:m.sku, nombre:m.nombre, motivo:m.motivo,
+        o:{c:redondear(m.costoUSDU||0,4), tc:redondear(m.tc||0,4), ex:redondear(m.extras||0,2), f:m.f},
+        n:{c:redondear(m.costoUSDU||0,4), tc:redondear(m.tc||0,4), ex:redondear(m.extras||0,2), f:m.f}};
+    });
+}
+function ccDif(r){
+  return r.n.c!==r.o.c||r.n.tc!==r.o.tc||r.n.ex!==r.o.ex||r.n.f!==r.o.f;
+}
+function ccUnit(v,qty){ return v.c*v.tc + (qty?v.ex/qty:0); }   /* costo puesto en almacén por pieza */
+function ccVista(){
+  var q=val("ccBusca").toLowerCase(), f=val("ccFil");
+  return CC.filas.filter(function(r){
+    if(f==="d"&&!ccDif(r))return false;
+    if(!q)return true;
+    var t=((r.nombre||"")+" "+(r.sku||"")+" "+(r.it.color||"")+" "+(r.it.talla||"")+" "+(r.it.cat||"")).toLowerCase();
+    return t.indexOf(q)>=0;
+  });
+}
+function ccPinta(){
+  var L=ccVista();
+  var b=L.map(function(r,i){
+    var k=CC.filas.indexOf(r), d=ccDif(r), fo=fotoDe(r.it);
+    var ua=ccUnit(r.o,r.qty), un=ccUnit(r.n,r.qty);
+    return "<tr class='"+(d?"dif":"")+"'>"+
+      "<td>"+(fo?'<img class="lf" src="'+fo+'">':'<div class="lf sf">sin<br>foto</div>')+"</td>"+
+      '<td><input class="fch" type="date" data-k="'+k+'" data-f="f" value="'+esc(r.n.f)+'"></td>'+
+      '<td><div class="lnm">'+esc(r.nombre||"")+'</div><div class="lsku">'+esc(r.sku||"")+
+        (r.it.talla||r.it.color?" · "+esc([r.it.talla,r.it.color].filter(Boolean).join(" · ")):"")+"</div></td>"+
+      '<td class="n">'+r.qty+"</td>"+
+      '<td class="n"><input type="number" step="0.01" data-k="'+k+'" data-f="c" value="'+r.n.c+'"></td>'+
+      '<td class="n"><input type="number" step="0.01" data-k="'+k+'" data-f="tc" value="'+r.n.tc+'"></td>'+
+      '<td class="n"><input type="number" step="0.01" data-k="'+k+'" data-f="ex" value="'+r.n.ex+'"></td>'+
+      '<td class="n">'+mxn(un,2)+(d&&Math.abs(un-ua)>0.005
+         ? '<div class="lsku">antes '+mxn(ua,2)+'</div>' : "")+"</td>"+
+      '<td class="n">'+mxn(un*r.qty,2)+"</td></tr>";
+  }).join("");
+  document.getElementById("ccTabla").innerHTML=
+    '<thead><tr><th></th><th>Fecha compra</th><th>Prenda</th><th class="n">Pz</th>'+
+    '<th class="n">Costo USD</th><th class="n">Tipo cambio</th><th class="n">Flete MXN</th>'+
+    '<th class="n">Unitario en almacén</th><th class="n">Total</th></tr></thead><tbody>'+
+    (b||'<tr><td colspan="9" style="padding:18px;color:var(--humo)">No hay compras que coincidan.</td></tr>')+
+    "</tbody>";
+  ccResumen();
+}
+function ccResumen(){
+  var ca=0,cn=0,cambiadas=0,ventas=0;
+  CC.filas.forEach(function(r){
+    ca+=ccUnit(r.o,r.qty)*r.qty; cn+=ccUnit(r.n,r.qty)*r.qty;
+    if(ccDif(r)){
+      cambiadas++;
+      ventas+=db.movs.filter(function(m){
+        return m.itemId===r.it.id&&(m.tipo==="venta"||m.tipo==="baja");}).length;
+    }
+  });
+  var dif=cn-ca, e=document.getElementById("ccRes"), np=Object.keys(CC.precios).length;
+  if(!CC.filas.length){e.innerHTML="No hay compras registradas.";return;}
+  if(!cambiadas&&!np){e.innerHTML="<b>"+CC.filas.length+" compras</b> · valor histórico "+mxn(ca)+
+    " · sin cambios todavía.";return;}
+  e.innerHTML="<b>"+cambiadas+" compra"+(cambiadas===1?"":"s")+" modificada"+(cambiadas===1?"":"s")+"</b> de "+CC.filas.length+
+    "<br>Valor de las compras: "+mxn(ca)+" → <b>"+mxn(cn)+"</b> ("+(dif>=0?"+":"")+mxn(dif)+")"+
+    (np?"<br>Además se corregirán <b>"+np+"</b> precio(s) de venta.":"")+
+    (ventas?"<br><b class='warnc'>Se recalcularán "+ventas+" movimiento(s) ya registrados: el costo de lo vendido y la utilidad del estado de resultados van a cambiar.</b>":"");
+}
+function ccBind(){
+  var t=document.getElementById("ccTabla");
+  t.addEventListener("input",function(ev){
+    var el=ev.target; if(el.dataset.k==null)return;
+    var r=CC.filas[+el.dataset.k], f=el.dataset.f;
+    r.n[f] = f==="f" ? el.value : redondear(parseFloat(el.value)||0,4);
+    clearTimeout(CC._t); CC._t=setTimeout(ccPinta,500);
+  });
+  ["ccBusca","ccFil"].forEach(function(k){
+    document.getElementById(k).addEventListener("input",ccPinta);
+    document.getElementById(k).addEventListener("change",ccPinta);
+  });
+  function aTodos(fn){ ccVista().forEach(fn); ccPinta(); }
+  document.getElementById("ccTcGo").onclick=function(){
+    var v=parseFloat(val("ccTc")); if(!(v>0)){aviso("Escribe un tipo de cambio.");return;}
+    aTodos(function(r){r.n.tc=redondear(v,4);});
+  };
+  document.getElementById("ccMulGo").onclick=function(){
+    var v=parseFloat(val("ccMul")); if(!(v>0)){aviso("Escribe un factor, por ejemplo 0.745.");return;}
+    aTodos(function(r){r.n.c=redondear(r.o.c*v,4);});
+  };
+  document.getElementById("ccSinFlete").onclick=function(){ aTodos(function(r){r.n.ex=0;}); };
+  document.getElementById("ccFlGo").onclick=function(){
+    var tot=parseFloat(val("ccFl")); if(!(tot>=0)){aviso("Escribe el flete total en pesos.");return;}
+    var L=ccVista(), base=L.reduce(function(s,r){return s+r.qty*r.n.c;},0);
+    if(base<=0){aviso("No puedo repartir: el costo de esas compras es cero.");return;}
+    L.forEach(function(r){r.n.ex=redondear(tot*(r.qty*r.n.c/base),2);});
+    ccPinta();
+  };
+  document.getElementById("ccFechaGo").onclick=function(){
+    var v=val("ccFecha"); if(!v){aviso("Elige una fecha.");return;}
+    aTodos(function(r){r.n.f=v;});
+  };
+  document.getElementById("ccDeshacer").onclick=function(){
+    CC.precios={};
+    CC.filas.forEach(function(r){r.n={c:r.o.c,tc:r.o.tc,ex:r.o.ex,f:r.o.f};}); ccPinta();
+  };
+  document.getElementById("ccCat").onclick=ccDelCatalogo;
+  document.getElementById("ccPegar").onclick=ccPegarModal;
+  document.getElementById("ccAplicar").onclick=ccAplicar;
+}
+/* Trae los costos confirmados del catálogo: costo de factura, flete por pieza
+   y tipo de cambio de la compra. También alinea el precio de venta. */
+function ccDelCatalogo(){
+  var tabla={}; CATALOGO.forEach(function(r){tabla[String(r[0]).toUpperCase()]=r;});
+  var n=0, sin=[], pr=0;
+  CC.filas.forEach(function(r){
+    var c=tabla[String(r.sku||"").toUpperCase()];
+    if(!c){ if(sin.indexOf(r.sku)<0)sin.push(r.sku); return; }
+    r.n.c  = redondear(c[6],4);
+    r.n.tc = redondear(c[9],4);
+    r.n.ex = redondear(c[8]*r.qty*c[9],2);   /* flete por pieza -> total del renglón, en pesos */
+    n++;
+    if(r.it&&r.it.id&&c[7]>0&&Math.abs((r.it.precio||0)-c[7])>0.5){CC.precios[r.it.id]=c[7];pr++;}
+  });
+  ccPinta();
+  aviso(n+" compra(s) con los costos del catálogo"+
+    (pr?" · "+pr+" precio(s) de venta por corregir":"")+
+    (sin.length?" · sin empate: "+sin.slice(0,4).join(", "):""));
+}
+/* Pegar desde Excel: SKU, costo USD, flete USD por pieza y tipo de cambio */
+function ccPegarModal(){
+  abrir("Pegar costos desde Excel",
+    '<div class="hint">Pega hasta cuatro columnas, en este orden: <b>SKU</b>, <b>costo unitario USD</b>, <b>flete USD por pieza</b> y <b>tipo de cambio</b>. Las dos últimas son opcionales. '+
+    'Una prenda por renglón; se empatan por SKU y te aviso lo que no reconozca.</div>'+
+    '<div class="f"><label for="ccTxt">Pega aquí</label>'+
+    '<textarea id="ccTxt" rows="9" style="width:100%;padding:9px;border:1px solid var(--nata);'+
+    'border-radius:9px;font:inherit;font-size:13px;resize:vertical" '+
+    'placeholder="W-1-M-BLK&#9;26.00&#9;8.15&#9;17.01&#10;W-3-L-GRY&#9;12.80&#9;8.15&#9;17.01"></textarea></div>',
+    '<button class="btn" data-x="c">Cancelar</button><button class="btn pri" data-x="g">Cargar los costos</button>');
+  on("c",cerrar);
+  on("g",function(){
+    var f=cgSplit(document.getElementById("ccTxt").value), n=0, sin=[];
+    f.forEach(function(fila){
+      var sku=String(fila[0]||"").trim().toUpperCase();
+      if(!sku)return;
+      var c=cgNum(fila[1]), sh=fila.length>2?cgNum(fila[2]):-1, tc=fila.length>3?cgNum(fila[3]):0;
+      var toco=false;
+      CC.filas.forEach(function(r){
+        if(String(r.sku||"").toUpperCase()!==sku)return;
+        if(c>0)r.n.c=redondear(c,4);
+        if(tc>0)r.n.tc=redondear(tc,4);
+        if(sh>=0)r.n.ex=redondear(sh*r.qty*(tc>0?tc:r.n.tc),2);
+        toco=true;
+      });
+      if(toco)n++; else if(!/^sku$/i.test(sku))sin.push(sku);
+    });
+    cerrar(); ccPinta();
+    aviso(n+" SKU actualizado"+(n===1?"":"s")+
+      (sin.length?" · no reconocí: "+sin.slice(0,5).join(", ")+(sin.length>5?"…":""):""));
+  });
+}
+function ccAplicar(){
+  var cambios=CC.filas.filter(ccDif), np=Object.keys(CC.precios).length;
+  if(!cambios.length&&!np){aviso("No has cambiado nada todavía.");return;}
+  if(!confirm("Se corrigen "+cambios.length+" compra(s)"+(np?" y "+np+" precio(s) de venta":"")+
+      ". El tablero recalcula existencias, costo promedio y "+
+      "el costo de todo lo que ya vendiste. Esto no se puede deshacer sin un respaldo. ¿Continuar?"))return;
+  cambios.forEach(function(r){
+    var m=db.movs.filter(function(x){return x.id===r.id;})[0];
+    if(!m)return;
+    m.costoUSDU=r.n.c; m.tc=r.n.tc; m.extras=r.n.ex; m.f=r.n.f;
+  });
+  Object.keys(CC.precios).forEach(function(id){var it=item(id); if(it)it.precio=CC.precios[id];});
+  recalcTodo(); guardar(); ccCargar(); ccPinta(); pintarTodo();
+  aviso(cambios.length+" compra(s) corregida(s)"+(np?" y "+np+" precio(s) actualizado(s)":"")+
+        ". Todo el historial se recalculó.");
+}
 
 /* ======================= Inventario vendido ======================= */
 function difDias(a,b){
@@ -1341,13 +1623,19 @@ function rango(){
   return {ini:new Date(ini.getTime()-ini.getTimezoneOffset()*60000).toISOString().slice(0,10),fin:hoy()};
 }
 function calcular(ini,fin){
-  var r={brutas:0,desc:0,dev:0,cogs:0,cogsUSD:0,mermas:0,gastos:0,piezas:0,tickets:0,comprasMXN:0,comprasUSD:0};
+  var r={brutas:0,desc:0,dev:0,cogs:0,cogsUSD:0,mermas:0,gastos:0,piezas:0,tickets:0,
+         comprasMXN:0,comprasUSD:0,comprasMerc:0,comprasFlete:0};
   db.movs.forEach(function(m){
     if(m.f<ini||m.f>fin)return;
     if(m.tipo==="venta"){r.brutas+=m.qty*m.precioU;r.desc+=m.desc;r.cogs+=m.cogs;r.cogsUSD+=m.cogsUSD||0;r.piezas+=m.qty;r.tickets++;}
     else if(m.tipo==="devolucion"){r.dev+=m.qty*m.precioU;r.cogs-=m.cogs;r.cogsUSD-=m.cogsUSD||0;r.piezas-=m.qty;}
     else if(m.tipo==="baja")r.mermas+=m.cogs;
-    else if(m.tipo==="entrada"){r.comprasMXN+=m.qty*m.costoMXNU;r.comprasUSD+=m.qty*(m.costoUSDU||0);}
+    else if(m.tipo==="entrada"){
+      r.comprasMXN+=m.qty*m.costoMXNU;
+      r.comprasUSD+=m.qty*(m.costoUSDU||0)+((m.tc?(m.extras||0)/m.tc:0));  /* con flete, para que cuadre con los pesos */
+      r.comprasMerc+=m.qty*(m.costoUSDU||0);
+      r.comprasFlete+=(m.tc?(m.extras||0)/m.tc:0);
+    }
   });
   db.gastos.forEach(function(g){if(g.f>=ini&&g.f<=fin)r.gastos+=g.monto;});
   r.netas=r.brutas-r.desc-r.dev;
@@ -1375,7 +1663,9 @@ function pintarPL(){
     tarjeta("a","Ventas netas",mxn(r.netas),r.piezas+" piezas · "+r.tickets+" ventas")+
     tarjeta("m","Utilidad bruta",mxn(r.bruta),"margen "+pct(r.mgB))+
     tarjeta(r.neta>=0?"m":"v","Utilidad neta",mxn(r.neta),"margen "+pct(r.mgN))+
-    tarjeta("c","Compras del periodo",usd(r.comprasUSD,0),mxn(r.comprasMXN)+" desembolsados");
+    tarjeta("c","Compras del periodo",mxn(r.comprasMXN),
+      usd(r.comprasUSD,0)+" puestos en almacén"+
+      (r.comprasFlete>0.5?" · mercancía "+usd(r.comprasMerc,0)+" + flete "+usd(r.comprasFlete,0):""));
 
   document.getElementById("plBody").innerHTML=
     linea("Ventas brutas",mxn(r.brutas,2))+
@@ -1516,24 +1806,24 @@ function fotoDe(it){
 /* ======================= Catálogo real ======================= */
 /* Origen: CATALOGO.xlsx (hojas Kids y Women).
    [sku, nombre, categoría, talla, color, piezas, costo de factura USD, precio MXN] */
-var CATALOGO=[["K-1","Modelo K-1","Niños","5-6 años","",1,15.0,400.0],["K-2","Modelo K-2","Niños","5-6 años","",1,14.5,500.0],["K-3","Modelo K-3","Niños","5-6 años","",1,14.0,0.0],["K-4","Modelo K-4","Niños","5-6 años","",3,8.6,500.0],["K-5","Modelo K-5","Niños","5-6 años","",3,12.75,500.0],["K-6","Modelo K-6","Niños","5-6 años","",3,12.75,500.0],["K-7","Modelo K-7","Niños","5-6 años","",2,7.8,400.0],["K-8","Modelo K-8","Niños","5-6 años","",2,8.6,0.0],["W-1-M-BLK","Modelo W-1","Mujer","M","Negro",1,26.0,800.0],["W-1-M-GRY","Modelo W-1","Mujer","M","Gris",3,26.0,800.0],["W-1-M-WHT","Modelo W-1","Mujer","M","Blanco",1,26.0,800.0],["W-2-M-GRY","Modelo W-2","Mujer","M","Gris",4,13.0,0.0],["W-3-L-GRY","Modelo W-3","Mujer","L","Gris",2,12.8,400.0],["W-3-L-BLK","Modelo W-3","Mujer","L","Negro",1,12.8,400.0],["W-3-L-BEI","Modelo W-3","Mujer","L","Beige",2,12.8,400.0],["W-4-M-BEI","Modelo W-4","Mujer","M","Beige",3,19.0,800.0],["W-5-XL-WHT","Modelo W-5","Mujer","XL","Blanco",2,8.7,400.0],["W-5-XXL-WHT","Modelo W-5","Mujer","XXL","Blanco",2,8.7,400.0],["W-6-M-WHT","Modelo W-6","Mujer","M","Blanco",3,9.0,400.0],["W-7-M-WHT","Modelo W-7","Mujer","M","Blanco",1,10.0,0.0],["W-7-L-WHT","Modelo W-7","Mujer","L","Blanco",2,10.0,0.0],["W-7-M-BEI","Modelo W-7","Mujer","M","Beige",1,10.0,0.0],["W-7-L-BEI","Modelo W-7","Mujer","L","Beige",2,10.0,0.0],["W-7-M-BLK","Modelo W-7","Mujer","M","Negro",1,10.0,0.0],["W-7-L-BLK","Modelo W-7","Mujer","L","Negro",3,10.0,0.0],["W-8-L-WHT","Modelo W-8","Mujer","L","Blanco",3,8.7,450.0],["W-8-L-BEI","Modelo W-8","Mujer","L","Beige",1,8.7,450.0],["W-8-L-BLU","Modelo W-8","Mujer","L","Azul",1,8.7,450.0],["W-8-L-PNK","Modelo W-8","Mujer","L","Rosa",2,8.7,450.0],["W-9-M-BLU","Modelo W-9","Mujer","M","Azul",1,12.6,500.0],["W-9-L-BLU","Modelo W-9","Mujer","L","Azul",2,12.6,500.0],["W-10-L-BLK","Modelo W-10","Mujer","L","Negro",2,14.1,400.0],["W-11-XXL-BRN","Modelo W-11","Mujer","XXL","Café",1,14.4,600.0],["W-11-XL-BRN","Modelo W-11","Mujer","XL","Café",1,14.4,600.0],["W-11-XXL-CRM","Modelo W-11","Mujer","XXL","Crema",1,14.4,600.0],["W-11-XXL-BEI","Modelo W-11","Mujer","XXL","Beige",1,14.4,600.0],["W-11-XL-BEI","Modelo W-11","Mujer","XL","Beige",1,14.4,600.0],["W-11-XXL-GRN","Modelo W-11","Mujer","XXL","Verde",1,14.4,600.0],["W-11-XL-GRN","Modelo W-11","Mujer","XL","Verde",1,14.4,600.0],["W-11-XL-CRM","Modelo W-11","Mujer","XL","Crema",1,14.4,600.0],["W-12-M-IVR","Modelo W-12","Mujer","M","Marfil",2,19.0,600.0],["W-12-L-IVR","Modelo W-12","Mujer","L","Marfil",1,19.0,600.0],["W-13-M-WHT","Modelo W-13","Mujer","M","Blanco",2,8.4,400.0],["W-13-L-WHT","Modelo W-13","Mujer","L","Blanco",2,8.4,400.0],["W-14-M-BLK","Modelo W-14","Mujer","M","Negro",2,10.5,400.0],["W-14-L-BLK","Modelo W-14","Mujer","L","Negro",2,10.5,400.0],["W-15-M-BKW","Modelo W-15","Mujer","M","Blanco y negro",1,8.1,600.0],["W-15-L-BKW","Modelo W-15","Mujer","L","Blanco y negro",1,8.1,400.0]];
-var CAT_TC=18.00, CAT_DESC=0.03, CAT_FLETE=385, CAT_BRUTO=1034.30, CAT_FECHA="2026-09-01";
+var CATALOGO=[["K-1","Modelo K-1","Niños","5-6 años","",1,15,400,8.15,17.01],["K-2","Modelo K-2","Niños","5-6 años","",1,14.5,500,8.15,17.01],["K-3","Modelo K-3","Niños","5-6 años","",1,14,0,8.15,17.01],["K-4","Modelo K-4","Niños","5-6 años","",3,8.6,500,8.15,17.01],["K-5","Modelo K-5","Niños","5-6 años","",3,12.75,500,8.15,17.01],["K-6","Modelo K-6","Niños","5-6 años","",3,12.75,500,8.15,17.01],["K-7","Modelo K-7","Niños","5-6 años","",2,7.8,400,8.15,17.01],["K-8","Modelo K-8","Niños","5-6 años","",2,8.6,0,8.15,17.01],["W-1-M-BLK","Modelo W-1","Mujer","M","Negro",1,26,800,8.15,17.01],["W-1-M-GRY","Modelo W-1","Mujer","M","Gris",3,26,800,8.15,17.01],["W-1-M-WHT","Modelo W-1","Mujer","M","Blanco",1,26,800,8.15,17.01],["W-2-M-GRY","Modelo W-2","Mujer","M","Gris",4,13,0,8.15,17.01],["W-3-L-GRY","Modelo W-3","Mujer","L","Gris",2,12.8,400,8.15,17.01],["W-3-L-BLK","Modelo W-3","Mujer","L","Negro",1,12.8,400,8.15,17.01],["W-3-L-BEI","Modelo W-3","Mujer","L","Beige",2,12.8,400,8.15,17.01],["W-4-M-BEI","Modelo W-4","Mujer","M","Beige",3,19,800,8.15,17.01],["W-5-XL-WHT","Modelo W-5","Mujer","XL","Blanco",2,8.7,400,8.15,17.01],["W-5-XXL-WHT","Modelo W-5","Mujer","XXL","Blanco",2,8.7,400,8.15,17.01],["W-6-M-WHT","Modelo W-6","Mujer","M","Blanco",3,9,400,8.15,17.01],["W-7-M-WHT","Modelo W-7","Mujer","M","Blanco",1,10,0,8.15,17.01],["W-7-L-WHT","Modelo W-7","Mujer","L","Blanco",2,10,0,8.15,17.01],["W-7-M-BEI","Modelo W-7","Mujer","M","Beige",1,10,0,8.15,17.01],["W-7-L-BEI","Modelo W-7","Mujer","L","Beige",2,10,0,8.15,17.01],["W-7-M-BLK","Modelo W-7","Mujer","M","Negro",1,10,0,8.15,17.01],["W-7-L-BLK","Modelo W-7","Mujer","L","Negro",3,10,0,8.15,17.01],["W-8-L-WHT","Modelo W-8","Mujer","L","Blanco",3,8.7,450,8.15,17.01],["W-8-L-BEI","Modelo W-8","Mujer","L","Beige",1,8.7,450,8.15,17.01],["W-8-L-BLU","Modelo W-8","Mujer","L","Azul",1,8.7,450,8.15,17.01],["W-8-L-PNK","Modelo W-8","Mujer","L","Rosa",2,8.7,450,8.15,17.01],["W-9-M-BLU","Modelo W-9","Mujer","M","Azul",1,12.6,500,8.15,17.01],["W-9-L-BLU","Modelo W-9","Mujer","L","Azul",2,12.6,500,8.15,17.01],["W-10-L-BLK","Modelo W-10","Mujer","L","Negro",2,14.1,500,8.15,17.01],["W-11-XXL-BRN","Modelo W-11","Mujer","XXL","Café",1,14.4,600,8.15,17.01],["W-11-XL-BRN","Modelo W-11","Mujer","XL","Café",1,14.4,600,8.15,17.01],["W-11-XXL-CRM","Modelo W-11","Mujer","XXL","Crema",1,14.4,600,8.15,17.01],["W-11-XXL-BEI","Modelo W-11","Mujer","XXL","Beige",1,14.4,600,8.15,17.01],["W-11-XL-BEI","Modelo W-11","Mujer","XL","Beige",1,14.4,600,8.15,17.01],["W-11-XXL-GRN","Modelo W-11","Mujer","XXL","Verde",1,14.4,600,8.15,17.01],["W-11-XL-GRN","Modelo W-11","Mujer","XL","Verde",1,14.4,600,8.15,17.01],["W-11-XL-CRM","Modelo W-11","Mujer","XL","Crema",1,14.4,600,8.15,17.01],["W-12-M-IVR","Modelo W-12","Mujer","M","Marfil",2,19,600,8.15,17.01],["W-12-L-IVR","Modelo W-12","Mujer","L","Marfil",1,19,600,8.15,17.01],["W-13-M-WHT","Modelo W-13","Mujer","M","Blanco",2,8.4,400,8.15,17.01],["W-13-L-WHT","Modelo W-13","Mujer","L","Blanco",2,8.4,400,8.15,17.01],["W-14-M-BLK","Modelo W-14","Mujer","M","Negro",2,10.5,400,8.15,17.01],["W-14-L-BLK","Modelo W-14","Mujer","L","Negro",2,10.5,400,8.15,17.01],["W-15-M-BKW","Modelo W-15","Mujer","M","Blanco y negro",1,8.1,400,8.15,17.01],["W-15-L-BKW","Modelo W-15","Mujer","L","Blanco y negro",1,8.1,400,8.15,17.01]];
+/* Costos confirmados por Misa (CATALOGO 16-sep): el flete viene por pieza,
+   no prorrateado a valor, y el tipo de cambio de la compra fue 17.01.
+   Cada renglón trae su propio flete y tipo de cambio, columnas 8 y 9. */
+var CAT_FECHA="2026-09-01";
 
 function cargarCatalogo(incluirSinPrecio){
   db.items=[]; db.movs=[]; db.cfg.seq=0;
   CATALOGO.forEach(function(r){
-    var q=r[5], u=r[6];
+    var q=r[5], u=r[6], sh=r[8], tc=r[9];
     if(q<=0)return;                                   /* sin existencia */
     if(r[7]<=0&&!incluirSinPrecio)return;              /* sin precio asignado */
-    /* el 3% de descuento y el flete se reparten a prorrata del valor de cada renglón,
-       para que el costo puesto en almacén sea el real y no el de la factura */
-    var ajusteUSD=q*u*(CAT_FLETE/CAT_BRUTO-CAT_DESC);
     var it={id:uid(),nombre:r[1],sku:r[0],cat:r[2],talla:r[3],color:r[4],
       qty:0,costoUSD:0,costoMXN:0,precio:r[7],min:0,foto:"",alta:CAT_FECHA,ultVenta:null};
     db.items.push(it);
     db.movs.push({id:uid(),ord:nextOrd(),f:CAT_FECHA,itemId:it.id,sku:it.sku,nombre:it.nombre,
-      tipo:"entrada",qty:q,costoUSDU:u,costoMXNU:0,tc:CAT_TC,extras:ajusteUSD*CAT_TC,
-      precioU:0,desc:0,cogs:0,cogsUSD:0,motivo:"Pedido inicial · 3% desc. y flete prorrateados",canal:""});
+      tipo:"entrada",qty:q,costoUSDU:u,costoMXNU:0,tc:tc,extras:sh*q*tc,
+      precioU:0,desc:0,cogs:0,cogsUSD:0,motivo:"Pedido inicial · flete US$"+sh.toFixed(2)+" por pieza",canal:""});
   });
   recalcTodo(); guardar(); pintarInv();
 }
@@ -2041,6 +2331,7 @@ document.getElementById("per").addEventListener("change",pintarPL);
 document.getElementById("fMov").addEventListener("change",pintarPL);
 
 cargar();
+corrigePedidoInicial();
 if(memoria)aviso("Este navegador bloquea el almacenamiento: los datos se perderán al cerrar.");
 if(!db.items.length&&!db.movs.length)cargarCatalogo();
 pintarInv();
