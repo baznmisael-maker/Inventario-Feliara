@@ -1561,7 +1561,8 @@ function pintarInv(){
 
   var q=document.getElementById("busca").value.toLowerCase();
   var cat=fc.value,est=document.getElementById("fEst").value;
-  var lista=vivos.filter(function(i){
+  var base = est==="sku" ? db.items : vivos;
+  var lista=base.filter(function(i){
     var txt=(i.nombre+" "+i.sku+" "+i.color+" "+i.talla+" "+i.cat).toLowerCase();
     if(q&&txt.indexOf(q)<0)return false;
     if(cat&&i.cat!==cat)return false;
@@ -1586,6 +1587,8 @@ function pintarInv(){
       " ("+prob.rep.slice(0,4).join(", ")+(prob.rep.length>4?"…":"")+")");
     if(prob.cortos.length)txt.push("<b>"+prob.cortos.length+"</b> sin talla ni color ("+
       prob.cortos.slice(0,4).join(", ")+(prob.cortos.length>4?"…":"")+")");
+    var agot=db.items.filter(function(i){return esSkuDudoso(i)&&i.qty<=0;}).length;
+    if(agot)txt.push(agot===1?"<b>1</b> de ellas está agotada":"<b>"+agot+"</b> de ellas están agotadas");
     cajaSku.innerHTML='<div class="avisoAg" style="border-left-color:var(--vino)">'+
       "<span>Claves por revisar: "+txt.join(" · ")+
       ". El catálogo agrupa las prendas por su clave, así que esto lo desordena.</span>"+
@@ -1605,8 +1608,10 @@ function pintarInv(){
 
   document.getElementById("vacioInv").hidden=db.items.length>0;
   document.getElementById("grid").innerHTML=lista.map(tarjetaPrenda).join("")||
-    (db.items.length?'<div class="vacio">'+(vivos.length?"Ningún artículo coincide con ese filtro.":
-      "Todo el inventario está agotado. Revisa la pestaña Inventario vendido.")+'</div>':"");
+    (db.items.length?'<div class="vacio">'+
+      (est==="sku"?"Ninguna clave tiene problema. Vuelve a Todo el inventario.":
+       (vivos.length?"Ningún artículo coincide con ese filtro.":
+        "Todo el inventario está agotado. Revisa la pestaña Inventario vendido."))+'</div>':"");
 }
 function tarjeta(cls,t,v,s){
   return '<div class="kpi '+cls+'"><b>'+t+'</b><div class="v">'+v+'</div><div class="s">'+s+'</div></div>';
